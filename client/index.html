@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" ng-app>
+
+<head>
+  <title>Vote for your favorites!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body {
+      padding-top: 60px;
+    }
+    
+    .navbar-inner {
+      text-align: center;
+      color: white;
+    }
+  </style>
+  <script>
+    function ChatController($scope) {
+      var socket = io.connect();
+      $scope.kellyVotes = 0;
+      $scope.carrieVotes = 0;
+      $scope.jordinVotes = 0;
+      $scope.jenniferVotes = 0;
+      socket.on('connect', function() {
+        $scope.setName();
+      });
+      socket.on('show', function(msg) {
+        console.log(msg);
+        $scope.kellyVotes = msg.kellyVotes;
+        $scope.carrieVotes = msg.carrieVotes;
+        $scope.jordinVotes = msg.jordinVotes;
+        $scope.jenniferVotes = msg.jenniferVotes;
+        $scope.$apply();
+      });
+      socket.on('roster', function(names) {
+        $scope.roster = names;
+        $scope.$apply();
+      });
+      $scope.send = function send() {
+        console.log('Sending message:', $scope.text);
+        socket.emit('vote', {
+          kellyVotes: $scope.kellyVotes,
+          carrieVotes: $scope.carrieVotes,
+          jordinVotes: $scope.jordinVotes,
+          jenniferVotes: $scope.jenniferVotes
+        });
+      };
+      $scope.showAll = function showAll() {
+        socket.emit('show');
+      };
+      $scope.showAll();
+      
+      $scope.vote = function vote(name) {
+        // socket.emit('show', {
+        //   "date": $scope.date //right here
+        // })
+        switch (name) {
+          case "Kelly Clarkson":
+            $scope.kellyVotes++;
+            break;
+            
+          case "Carrie Underwood":
+            $scope.carrieVotes++;
+            break;
+            
+          case "Jordin Sparks":
+            $scope.jordinVotes++;
+            break;
+            
+          case "Jennifer Hudson":
+            $scope.jenniferVotes++;
+            break;
+        }
+        $scope.send();
+        $scope.$apply();
+      }
+      $scope.setName = function setName() {
+        socket.emit('identify', $scope.name);
+      };
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="navbar navbar-fixed-top navbar-inverse">
+      <div class="navbar-inner">
+        <h4>Voting</h4>
+        <div class="pull-right">
+          <!--<a href="https://c9.io" class="brand">Cloud9 IDE</a> --></div>
+      </div>
+    </div>
+    <div ng-controller="ChatController">
+      <div class="row">
+      </div>
+      <div class="row controls">
+      </div>
+      <div class="page-header">
+        <h1>American Idol</h1> </div>
+      <div class="row">
+        <div class="span3">
+          <h4>Kelly Clarkson</h4>
+          <img src="http://detroitsportsrag.net/wp-content/uploads/2015/09/idol-02-b.jpg">
+          <button ng-click="vote('Kelly Clarkson')">Vote</button>
+          <div ng-bind="kellyVotes"></div>
+        </div>
+        <div class="span3">
+          <h4>Carrie Underwood</h4>
+          <img src="https://i.ytimg.com/vi/KOlrEFQ24SM/hqdefault.jpg">
+          <button ng-click="vote('Carrie Underwood')">Vote</button>
+          <div ng-bind="carrieVotes"></div>
+        </div>
+        <div class="span3">
+          <h4>Jordin Sparks</h4>
+          <img src="http://theheatmag.com/wp-content/uploads/2011/05/jordin-sparks.jpg">
+          <button ng-click="vote('Jordin Sparks')">Vote</button>
+          <div ng-bind="jordinVotes"></div>
+        </div>
+        <div class="span3">
+          <h4>Jennifer Hudson</h4>
+          <img src="https://i.ytimg.com/vi/chBW2TPX0AA/hqdefault.jpg">
+          <button ng-click="vote('Jennifer Hudson')">Vote</button>
+          <div ng-bind="jenniferVotes"></div>
+        </div>
+      </div>
+      <br>
+      </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/angular.min.js"></script>
+</body>
+
+</html>
